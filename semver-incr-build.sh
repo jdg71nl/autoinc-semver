@@ -1,42 +1,45 @@
 #!/bin/bash
 #
-#
-# Copyright (c) 2020 Robert van den Breemen - released under MIT license - see the end of this file
+# Copyright (c) 2022 John de Graaff - released under MIT license - see the end of this file
 #
 # This script auto increment a header file, that can be included in your projects
 # Using the format as described by Semantic Version 2.0 format (Read more https://semver.org/)
 # Note: this script does not implement pre-release tagging at this point
-echo "Let's increment the buildnumber"
-file=$1
-echo "Processing file [$1]"
+echo "# Let's increment the build number ..."
+FILE=$1
+if [ ${FILE} == ""]; then
+  FILE="version.h"
+fi
+echo "# Processing file: '${FILE}' "
 
-if [ -z "$file" ]; then
-	echo "Usage: $0 <filename>"
+if [ -z "${FILE}" ]; then
+	echo "# Usage: $0 [<filename> version.h] "
 fi
 
 # Create timestamp
-TIMESTAMP=$(date '+%d/%m/%Y')
-Hour=$(date '+%H')
-Minute=$(date '+%M')
-Second=$(date '+%S')
-Day=$(date '+%d')
-Month=$(date '+%m')
-Year=$(date '+%Y')
-echo "$TIMESTAMP"
+# TIMESTAMP=$(date '+%d/%m/%Y')
+TIMESTAMP=$(date '+%Y-%m-%d.%H:%M:%S')
+# HOUR=$(date '+%H')
+# MINUTE=$(date '+%M')
+# SECOND=$(date '+%S')
+# DAY=$(date '+%d')
+# MONTH=$(date '+%m')
+# YEAR=$(date '+%Y')
+echo "# DateTime: ${TIMESTAMP} "
 
 # clear version numbers
-MAJOR=
-MINOR=
-PATCH=
-BUILD=
-VERSION=
+MAJOR=""
+MINOR=""
+PATCH=""
+BUILD=""
+VERSION=""
 
-if [[ -f "$file" ]]; then
+if [[ -f "${FILE}" ]]; then
 	# echo Parse %1 for major.minor.patch-build values and parse them
 	IFS=' '
 	while read -r line
 	do
-	#	echo "$line"
+	#	echo "# $line"
 		read -ra tokens <<< "$line"
 		val=${tokens[2]//[!0-9]/}
 		case ${tokens[1]} in
@@ -53,38 +56,39 @@ if [[ -f "$file" ]]; then
 				BUILD=$val
 				;;
 		esac
-	done <"$file"
+	done <"${FILE}"
 fi 
 
-if [ "$MAJOR$MINOR$PATCH$BUILD" == "" ] ;  then
-        echo "Initializing [$file] to default values:"
-        MAJOR=0
+if [ "$MAJOR${MINOR}${PATCH}${BUILD}" == "" ] ;  then
+        echo "# Initializing [${FILE}] to default values:"
+        MAJOR=1
         MINOR=0
         PATCH=0
         BUILD=0
 fi
 
-VERSION="$MAJOR.$MINOR.$PATCH+$BUILD"
-echo "Found version: $VERSION"
+VERSION="$MAJOR.${MINOR}.${PATCH}+${BUILD}"
+echo "# Found version: ${VERSION}"
 
 # now auto increment build number by 1
 BUILD=$((BUILD+1))
-VERSION="$MAJOR.$MINOR.$PATCH+$BUILD"
-echo "Increment build $BUILD"
-echo "Version is: $VERSION"
+VERSION="$MAJOR.${MINOR}.${PATCH}+${BUILD}"
+echo "# Incrementing build: ${BUILD}"
+echo "# new Version is: ${VERSION}"
 
 # write the version numbers out to the file
-echo "//The version number conforms to semver.org format">$file
-echo "#define _VERSION_MAJOR ${MAJOR}">>$file
-echo "#define _VERSION_MINOR $MINOR">>$file
-echo "#define _VERSION_PATCH $PATCH">>$file
-echo "#define _VERSION_BUILD $BUILD">>$file
-echo "#define _VERSION_DATE \"$TIMESTAMP\"">>$file
-echo "#define _VERSION_TIME \"$Hour:$Minute:$Second\"">>$file
-echo "#define _VERSION_ONLY \"$MAJOR.$MINOR.$PATCH\"">>$file
-echo "#define _VERSION_NOBUILD \"$MAJOR.$MINOR.$PATCH ($TIMESTAMP)\"">>$file
-echo "#define _VERSION \"$VERSION ($TIMESTAMP)\"">>$file
-echo "//The version information is created automatically, more information here: https://github.com/rvdbreemen/autoinc-semver">>$file
+echo "//The version number conforms to semver.org format">${FILE}
+echo "#define _VERSION_MAJOR ${MAJOR}">>${FILE}
+echo "#define _VERSION_MINOR ${MINOR}">>${FILE}
+echo "#define _VERSION_PATCH ${PATCH}">>${FILE}
+echo "#define _VERSION_BUILD ${BUILD}">>${FILE}
+echo "#define _VERSION_DATETIME \"${TIMESTAMP}\"">>${FILE}
+# echo "#define _VERSION_DATE \"${TIMESTAMP}\"">>${FILE}
+# echo "#define _VERSION_TIME \"${HOUR}:${MINUTE}:${SECOND}\"">>${FILE}
+echo "#define _VERSION_ONLY \"$MAJOR.${MINOR}.${PATCH}\"">>${FILE}
+echo "#define _VERSION_NOBUILD \"$MAJOR.${MINOR}.${PATCH} (${TIMESTAMP})\"">>${FILE}
+echo "#define _VERSION \"${VERSION} (${TIMESTAMP})\"">>${FILE}
+echo "//The version information is created automatically, more information here: https://github.com/jdg71nl/autoinc-semver">>${FILE}
 
 # clear version numbers
 MAJOR=
@@ -93,13 +97,13 @@ PATCH=
 BUILD=
 VERSION=
 TIMESTAMP=
-echo $VERSION
+# echo ${VERSION}
 
-exit 1
+exit 0
 
 # MIT License
 #
-# Copyright (c) 2020 Robert van den Breemen
+# Copyright (c) 2022 John de Graaff
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
